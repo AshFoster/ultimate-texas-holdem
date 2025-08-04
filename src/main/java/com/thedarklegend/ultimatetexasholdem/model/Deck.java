@@ -2,6 +2,7 @@ package com.thedarklegend.ultimatetexasholdem.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class Deck
 {
@@ -25,6 +26,11 @@ public class Deck
 
     public Card draw()
     {
+        if (cards.isEmpty())
+        {
+            throw new NoSuchElementException("The deck has no more cards!");
+        }
+
         return cards.remove(0);
     }
 }
