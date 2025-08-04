@@ -20,7 +20,7 @@ public class Deck
 
     public List<Card> getCards()
     {
-        return cards;
+        return new ArrayList<>(cards);
     }
 
     public int size()
