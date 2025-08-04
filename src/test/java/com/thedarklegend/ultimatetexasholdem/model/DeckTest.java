@@ -2,9 +2,7 @@ package com.thedarklegend.ultimatetexasholdem.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,5 +52,16 @@ public class DeckTest
         }
 
         assertEquals(52, uniqueCards.size());
+    }
+
+    @Test
+    void shuffleShouldChangeTheOrderOfTheDeck()
+    {
+        Deck deck = new Deck();
+        List<Card> before = new ArrayList<>(deck.getCards());
+        deck.shuffle(new Random(13));
+        List<Card> after = new ArrayList<>(deck.getCards());
+
+        assertNotEquals(before, after);
     }
 }

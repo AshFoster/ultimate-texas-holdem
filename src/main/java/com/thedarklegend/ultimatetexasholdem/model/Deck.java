@@ -1,8 +1,6 @@
 package com.thedarklegend.ultimatetexasholdem.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class Deck
 {
@@ -19,6 +17,12 @@ public class Deck
             }
         }
     }
+
+    public List<Card> getCards()
+    {
+        return cards;
+    }
+
     public int size()
     {
         return cards.size();
@@ -32,5 +36,15 @@ public class Deck
         }
 
         return cards.remove(0);
+    }
+
+    public void shuffle()
+    {
+        Collections.shuffle(cards);
+    }
+
+    public void shuffle(Random random)
+    {
+        Collections.shuffle(cards, random);
     }
 }
