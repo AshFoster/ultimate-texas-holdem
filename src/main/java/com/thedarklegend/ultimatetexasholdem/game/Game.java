@@ -14,6 +14,7 @@ public class Game
     private final Player player;
     private final Dealer dealer;
     private final List<Card> communityCards;
+    private GamePhase gamePhase = GamePhase.NOT_STARTED;
 
     public Game()
     {
@@ -35,23 +36,36 @@ public class Game
         dealer.receiveCard(deck.draw());
         player.receiveCard(deck.draw());
         dealer.receiveCard(deck.draw());
+        gamePhase = GamePhase.HOLE_CARDS;
     }
 
     public void dealFlop()
     {
+        if (gamePhase != GamePhase.HOLE_CARDS)
+        {
+            throw new IllegalStateException("Must deal hole cards first!");
+        }
+
         burn();
         for (int i = 0; i < 3; i++)
         {
             communityCards.add(deck.draw());
         }
+        gamePhase = GamePhase.FLOP;
     }
 
     public void dealTurnAndRiver()
     {
+        if (gamePhase != GamePhase.FLOP)
+        {
+            throw new IllegalStateException("Must deal flop first!");
+        }
+
         burn();
         communityCards.add(deck.draw());
         burn();
         communityCards.add(deck.draw());
+        gamePhase = GamePhase.TURN_AND_RIVER;
     }
 
     private void burn()
@@ -64,6 +78,7 @@ public class Game
         player.resetHand();
         dealer.resetHand();
         communityCards.clear();
+        gamePhase = GamePhase.NOT_STARTED;
     }
 
     public Deck getDeck()

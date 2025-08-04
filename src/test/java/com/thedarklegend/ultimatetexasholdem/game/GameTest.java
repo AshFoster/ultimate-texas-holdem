@@ -3,6 +3,7 @@ package com.thedarklegend.ultimatetexasholdem.game;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GameTest
 {
@@ -51,5 +52,21 @@ public class GameTest
         assertEquals(0, game.getPlayer().getHand().size());
         assertEquals(0, game.getDealer().getHand().size());
         assertEquals(0, game.getCommunityCards().size());
+    }
+
+    @Test
+    void callingDealFlopOutOfOrderThrowsException()
+    {
+        Game game = new Game();
+
+        assertThrows(IllegalStateException.class, game::dealFlop);
+    }
+
+    @Test
+    void callingDealTurnAndRiverOutOfOrderThrowsException()
+    {
+        Game game = new Game();
+
+        assertThrows(IllegalStateException.class, game::dealTurnAndRiver);
     }
 }
