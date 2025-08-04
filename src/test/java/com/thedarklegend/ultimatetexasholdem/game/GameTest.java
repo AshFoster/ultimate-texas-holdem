@@ -26,4 +26,16 @@ public class GameTest
         assertEquals(52 - 8, game.getDeck().size());
         assertEquals(3, game.getCommunityCards().size());
     }
+
+    @Test
+    void dealTurnAndRiverShouldBurnTwoCardsAndDealTwoCommunityCards()
+    {
+        Game game = new Game();
+        game.start();
+        game.dealFlop();
+        game.dealTurnAndRiver();
+
+        assertEquals(52 - 12, game.getDeck().size());
+        assertEquals(5, game.getCommunityCards().size());
+    }
 }

@@ -46,6 +46,14 @@ public class Game
         }
     }
 
+    public void dealTurnAndRiver()
+    {
+        burn();
+        communityCards.add(deck.draw());
+        burn();
+        communityCards.add(deck.draw());
+    }
+
     private void burn()
     {
         deck.draw();
