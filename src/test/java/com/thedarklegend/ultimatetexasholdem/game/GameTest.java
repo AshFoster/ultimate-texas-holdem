@@ -38,4 +38,18 @@ public class GameTest
         assertEquals(52 - 12, game.getDeck().size());
         assertEquals(5, game.getCommunityCards().size());
     }
+
+    @Test
+    void resetShouldClearHandsAndCommunityCards()
+    {
+        Game game = new Game();
+        game.start();
+        game.dealFlop();
+        game.dealTurnAndRiver();
+        game.reset();
+
+        assertEquals(0, game.getPlayer().getHand().size());
+        assertEquals(0, game.getDealer().getHand().size());
+        assertEquals(0, game.getCommunityCards().size());
+    }
 }

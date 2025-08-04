@@ -59,6 +59,13 @@ public class Game
         deck.draw();
     }
 
+    public void reset()
+    {
+        player.resetHand();
+        dealer.resetHand();
+        communityCards.clear();
+    }
+
     public Deck getDeck()
     {
         return deck;
