@@ -16,15 +16,25 @@ public class HandEvaluator
         }
 
         EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(allCards);
-        EnumMap<Rank, List<Card>> pairs = getPairs(cardsByRank);
+        List<List<Card>> pairs = getPairs(cardsByRank);
 
         if (!pairs.isEmpty())
         {
-            List<Card> currentHand = pairs.values().iterator().next();
+            HandRank handRank = HandRank.PAIR;
+            List<Card> currentHand = pairs.get(0);
+
+            if (pairs.size() >= 2)
+            {
+                currentHand.addAll(pairs.get(1));
+                handRank = HandRank.TWO_PAIR;
+            }
+
             List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
             List<Rank> orderedRanks = extractRanks(bestHand);
 
-            return EvaluatedHand.create(HandRank.PAIR,
+            System.out.println(bestHand);
+            System.out.println(orderedRanks);
+            return EvaluatedHand.create(handRank,
                                         bestHand,
                                         orderedRanks);
         }
@@ -34,24 +44,25 @@ public class HandEvaluator
                                     Collections.emptyList());
     }
 
-    private static EnumMap<Rank, List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
+    private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 2);
     }
 
-    private static EnumMap<Rank, List<Card>> getGroupedRanksBySize(EnumMap<Rank, List<Card>> cardsByRank, int size)
+    private static List<List<Card>> getGroupedRanksBySize(EnumMap<Rank, List<Card>> cardsByRank, int size)
     {
-        EnumMap<Rank, List<Card>> pairs = new EnumMap<>(Rank.class);
+        List<List<Card>> groupedRanks = new ArrayList<>();
 
         for (Map.Entry<Rank, List<Card>> entry : cardsByRank.entrySet())
         {
             if (entry.getValue().size() == size)
             {
-                pairs.put(entry.getKey(), entry.getValue());
+                groupedRanks.add(entry.getValue());
             }
         }
 
-        return pairs;
+        groupedRanks.sort((a, b) -> b.get(0).getRank().getValue() - a.get(0).getRank().getValue());
+        return groupedRanks;
     }
 
     private static EnumMap<Rank, List<Card>> getCardsByRank(List<Card> cards)

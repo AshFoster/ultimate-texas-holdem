@@ -59,7 +59,7 @@ public class HandEvaluatorTest
     }
 
     @Test
-    void evaluateShouldReturnAnEvaluatedHandWithOrderRanks_whenProvidedHandContainsAPair()
+    void evaluateShouldReturnAnEvaluatedHandWithOrderedRanks_whenProvidedHandContainsAPair()
     {
         List<Card> hand = List.of(new Card(Rank.ACE, Suit.SPADES),
                                   new Card(Rank.ACE, Suit.CLUBS),
@@ -72,6 +72,25 @@ public class HandEvaluatorTest
         EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
         List<Rank> orderedRanks = List.of(Rank.ACE, Rank.QUEEN, Rank.TEN, Rank.FIVE);
 
-        assertEquals( evaluatedHand.getOrderedRanks(), orderedRanks);
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfTwoPairAndBestKickersAndOrderedRanks_whenProvidedHandContainsTwoPair()
+    {
+        List<Card> hand = List.of(new Card(Rank.TWO, Suit.SPADES),
+                                  new Card(Rank.TWO, Suit.CLUBS),
+                                  new Card(Rank.THREE, Suit.SPADES),
+                                  new Card(Rank.QUEEN, Suit.DIAMONDS),
+                                  new Card(Rank.ACE, Suit.SPADES),
+                                  new Card(Rank.ACE, Suit.CLUBS),
+                                  new Card(Rank.FIVE, Suit.DIAMONDS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.ACE, Rank.TWO, Rank.QUEEN);
+
+        assertEquals(HandRank.TWO_PAIR, evaluatedHand.getHandRank());
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.QUEEN, Suit.DIAMONDS)));
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
     }
 }
