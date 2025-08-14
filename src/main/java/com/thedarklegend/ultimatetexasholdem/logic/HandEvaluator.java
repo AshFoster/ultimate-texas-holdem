@@ -18,47 +18,76 @@ public class HandEvaluator
         EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(allCards);
         List<List<Card>> pairs = getPairs(cardsByRank);
 
-        if (!pairs.isEmpty())
+        if (pairs.size() == 1)
         {
-            HandRank handRank = HandRank.PAIR;
-            List<Card> currentHand = pairs.get(0);
+            return generateBestPairHand(allCards, pairs);
+        }
 
-            if (pairs.size() >= 2)
-            {
-                currentHand.addAll(pairs.get(1));
-                handRank = HandRank.TWO_PAIR;
-            }
-
-            List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
-            List<Rank> orderedRanks = extractRanks(bestHand);
-
-            System.out.println(bestHand);
-            System.out.println(orderedRanks);
-            return EvaluatedHand.create(handRank,
-                                        bestHand,
-                                        orderedRanks);
+        if (pairs.size() >= 2)
+        {
+            return generateBestTwoPairHand(allCards, pairs);
         }
 
         List<List<Card>> trips = getTrips(cardsByRank);
 
         if (!trips.isEmpty())
         {
-            HandRank handRank = HandRank.THREE_OF_A_KIND;
-            List<Card> currentHand = trips.get(0);
-
-            List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
-            List<Rank> orderedRanks = extractRanks(bestHand);
-
-            System.out.println(bestHand);
-            System.out.println(orderedRanks);
-            return EvaluatedHand.create(handRank,
-                                        bestHand,
-                                        orderedRanks);
+            return generateBestThreeOfAKindHand(allCards, trips);
         }
 
         return EvaluatedHand.create(HandRank.HIGH_CARD,
                                     allCards.subList(0, 5),
                                     Collections.emptyList());
+    }
+
+    private static EvaluatedHand generateBestPairHand(List<Card> allCards,
+                                                      List<List<Card>> pairs)
+    {
+        HandRank handRank = HandRank.PAIR;
+
+        List<Card> currentHand = pairs.get(0);
+        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
+    private static EvaluatedHand generateBestTwoPairHand(List<Card> allCards,
+                                                         List<List<Card>> pairs)
+    {
+        HandRank handRank = HandRank.TWO_PAIR;
+
+        List<Card> currentHand = pairs.get(0);
+        currentHand.addAll(pairs.get(1));
+
+        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
+    private static EvaluatedHand generateBestThreeOfAKindHand(List<Card> allCards,
+                                                              List<List<Card>> trips)
+    {
+        HandRank handRank = HandRank.THREE_OF_A_KIND;
+
+        List<Card> currentHand = trips.get(0);
+        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
     }
 
     private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
