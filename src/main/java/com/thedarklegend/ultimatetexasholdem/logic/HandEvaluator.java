@@ -34,6 +34,13 @@ public class HandEvaluator
             return generateBestFlushHand(flushes);
         }
 
+        List<List<Card>> straights = getAllFiveCardStraights(cardsByRank);
+
+        if (!straights.isEmpty())
+        {
+            return generateBestStraightHand(straights);
+        }
+
         if (pairs.size() == 1)
         {
             return generateBestPairHand(allCards, pairs);
@@ -166,6 +173,20 @@ public class HandEvaluator
                                     orderedRanks);
     }
 
+    private static EvaluatedHand generateBestStraightHand(List<List<Card>> straights)
+    {
+        HandRank handRank = HandRank.STRAIGHT;
+
+        List<Card> bestHand = straights.get(0);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
     private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 2);
@@ -228,6 +249,45 @@ public class HandEvaluator
         }
 
         return groupedFlushes;
+    }
+
+    private static List<List<Card>> getAllFiveCardStraights(EnumMap<Rank, List<Card>> cardsByRank)
+    {
+        List<List<Card>> groupedStraights = new ArrayList<>();
+        List<Card> straightCards = new ArrayList<>();
+
+        for (Map.Entry<Rank, List<Card>> entry : cardsByRank.entrySet())
+        {
+            straightCards.addAll(entry.getValue());
+        }
+
+        straightCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
+
+        for (int i = 0; i < straightCards.size() - 1; i++)
+        {
+            if (straightCards.get(i).getRank().getValue() != straightCards.get(i + 1).getRank().getValue() + 1)
+            {
+                straightCards.remove(i);
+                i = i - 1;
+            }
+        }
+
+        if (straightCards.size() >= 5)
+        {
+            groupedStraights.add(straightCards.subList(0, 5));
+        }
+
+        if (straightCards.size() >= 6)
+        {
+            groupedStraights.add(straightCards.subList(1, 6));
+        }
+
+        if (straightCards.size() == 7)
+        {
+            groupedStraights.add(straightCards.subList(2, 7));
+        }
+
+        return groupedStraights;
     }
 
     private static EnumMap<Rank, List<Card>> getCardsByRank(List<Card> cards)
