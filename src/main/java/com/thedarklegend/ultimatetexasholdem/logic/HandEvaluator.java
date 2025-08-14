@@ -39,6 +39,23 @@ public class HandEvaluator
                                         orderedRanks);
         }
 
+        List<List<Card>> trips = getTrips(cardsByRank);
+
+        if (!trips.isEmpty())
+        {
+            HandRank handRank = HandRank.THREE_OF_A_KIND;
+            List<Card> currentHand = trips.get(0);
+
+            List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
+            List<Rank> orderedRanks = extractRanks(bestHand);
+
+            System.out.println(bestHand);
+            System.out.println(orderedRanks);
+            return EvaluatedHand.create(handRank,
+                                        bestHand,
+                                        orderedRanks);
+        }
+
         return EvaluatedHand.create(HandRank.HIGH_CARD,
                                     allCards.subList(0, 5),
                                     Collections.emptyList());
@@ -47,6 +64,11 @@ public class HandEvaluator
     private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 2);
+    }
+
+    private static List<List<Card>> getTrips(EnumMap<Rank, List<Card>> cardsByRank)
+    {
+        return getGroupedRanksBySize(cardsByRank, 3);
     }
 
     private static List<List<Card>> getGroupedRanksBySize(EnumMap<Rank, List<Card>> cardsByRank, int size)
