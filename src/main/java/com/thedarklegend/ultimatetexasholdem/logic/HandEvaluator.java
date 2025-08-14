@@ -20,7 +20,7 @@ public class HandEvaluator
         List<List<Card>> pairs = getPairs(cardsByRank);
         List<List<Card>> trips = getTrips(cardsByRank);
 
-        if (!pairs.isEmpty() && !trips.isEmpty())
+        if ((!pairs.isEmpty() && !trips.isEmpty()) || trips.size() > 1)
         {
             return generateBestFullHouseHand(trips, pairs);
         }
@@ -133,7 +133,16 @@ public class HandEvaluator
         HandRank handRank = HandRank.FULL_HOUSE;
 
         List<Card> bestHand = trips.get(0);
-        bestHand.addAll(pairs.get(0));
+
+        if (trips.size() > 1)
+        {
+            bestHand.addAll(trips.get(1).subList(0,2));
+        }
+        else
+        {
+            bestHand.addAll(pairs.get(0));
+        }
+
         List<Rank> orderedRanks = extractRanks(bestHand);
 
         System.out.println(bestHand);

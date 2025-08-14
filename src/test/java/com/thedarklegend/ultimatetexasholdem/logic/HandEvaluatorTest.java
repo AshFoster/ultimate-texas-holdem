@@ -152,6 +152,22 @@ public class HandEvaluatorTest
     }
 
     @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfFullHouse_whenProvidedHandContainsTwoTrips()
+    {
+        List<Card> hand = List.of(new Card(Rank.TWO, Suit.SPADES),
+                                  new Card(Rank.TWO, Suit.CLUBS),
+                                  new Card(Rank.TWO, Suit.HEARTS),
+                                  new Card(Rank.ACE, Suit.DIAMONDS),
+                                  new Card(Rank.ACE, Suit.SPADES),
+                                  new Card(Rank.ACE, Suit.CLUBS),
+                                  new Card(Rank.FIVE, Suit.DIAMONDS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+
+        assertEquals(HandRank.FULL_HOUSE, evaluatedHand.getHandRank());
+    }
+
+    @Test
     void evaluateShouldReturnAnEvaluatedHandWithHandRankOfFLushAndOrderedRanks_whenProvidedHandContainsAFlush()
     {
         List<Card> hand = List.of(new Card(Rank.TWO, Suit.HEARTS),
