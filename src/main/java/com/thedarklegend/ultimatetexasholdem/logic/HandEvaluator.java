@@ -16,7 +16,14 @@ public class HandEvaluator
         }
 
         EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(allCards);
+
         List<List<Card>> pairs = getPairs(cardsByRank);
+        List<List<Card>> trips = getTrips(cardsByRank);
+
+        if (!pairs.isEmpty() && !trips.isEmpty())
+        {
+            return generateBestFullHouseHand(trips, pairs);
+        }
 
         if (pairs.size() == 1)
         {
@@ -27,8 +34,6 @@ public class HandEvaluator
         {
             return generateBestTwoPairHand(allCards, pairs);
         }
-
-        List<List<Card>> trips = getTrips(cardsByRank);
 
         if (!trips.isEmpty())
         {
@@ -104,6 +109,22 @@ public class HandEvaluator
 
         List<Card> currentHand = quads.get(0);
         List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
+    private static EvaluatedHand generateBestFullHouseHand(List<List<Card>> trips,
+                                                           List<List<Card>> pairs)
+    {
+        HandRank handRank = HandRank.FULL_HOUSE;
+
+        List<Card> bestHand = trips.get(0);
+        bestHand.addAll(pairs.get(0));
         List<Rank> orderedRanks = extractRanks(bestHand);
 
         System.out.println(bestHand);

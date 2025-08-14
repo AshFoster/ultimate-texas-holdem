@@ -132,4 +132,22 @@ public class HandEvaluatorTest
         assertTrue(evaluatedHand.getHand().contains(new Card(Rank.ACE, Suit.SPADES)));
         assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
     }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfFullHouseAndOrderedRanks_whenProvidedHandContainsAFullHouse()
+    {
+        List<Card> hand = List.of(new Card(Rank.TWO, Suit.SPADES),
+                                  new Card(Rank.TWO, Suit.CLUBS),
+                                  new Card(Rank.TWO, Suit.HEARTS),
+                                  new Card(Rank.ACE, Suit.DIAMONDS),
+                                  new Card(Rank.ACE, Suit.SPADES),
+                                  new Card(Rank.JACK, Suit.CLUBS),
+                                  new Card(Rank.FIVE, Suit.DIAMONDS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.TWO, Rank.ACE);
+
+        assertEquals(HandRank.FULL_HOUSE, evaluatedHand.getHandRank());
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
 }
