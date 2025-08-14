@@ -6,36 +6,31 @@ import java.util.*;
 
 public class HandEvaluator
 {
-    public static EvaluatedHand evaluate(List<Card> hand)
+    public static EvaluatedHand evaluate(List<Card> allCards)
     {
-        Objects.requireNonNull(hand, "Hand cannot be null!");
+        Objects.requireNonNull(allCards, "Hand cannot be null!");
 
-        if (hand.size() != 7)
+        if (allCards.size() != 7)
         {
-            throw new IllegalArgumentException("evaluate() requires exactly 7 cards but got " + hand.size());
+            throw new IllegalArgumentException("evaluate() requires exactly 7 cards but got " + allCards.size());
         }
 
-        EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(hand);
+        EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(allCards);
         EnumMap<Rank, List<Card>> pairs = getPairs(cardsByRank);
 
         if (!pairs.isEmpty())
         {
-            List<Card> bestHand = pairs.values().iterator().next();
-
-            List<Card> completeHand = new ArrayList<>(bestHand);
-            for (Card card : hand)
-            {
-                if (!completeHand.contains(card)) completeHand.add(card);
-                if (completeHand.size() == 5) break;
-            }
+            List<Card> currentHand = pairs.values().iterator().next();
+            List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
+            List<Rank> orderedRanks = extractRanks(bestHand);
 
             return EvaluatedHand.create(HandRank.PAIR,
-                                        completeHand,
-                                        Collections.emptyList());
+                                        bestHand,
+                                        orderedRanks);
         }
 
         return EvaluatedHand.create(HandRank.HIGH_CARD,
-                                    hand.subList(0, 5),
+                                    allCards.subList(0, 5),
                                     Collections.emptyList());
     }
 
@@ -69,5 +64,36 @@ public class HandEvaluator
         }
 
         return cardsByRank;
+    }
+
+    private static List<Card> extractBestFiveCards(List<Card> allCards, List<Card> currentCards)
+    {
+        int kickerCount = 5 - currentCards.size();
+        List<Card> remainingCards = new ArrayList<>();
+        List<Card> bestHand = new ArrayList<>(currentCards);
+        for (Card card : allCards)
+        {
+            if (!currentCards.contains(card))
+            {
+                remainingCards.add(card);
+            }
+        }
+
+        remainingCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
+
+        for (int i = 0; i < kickerCount && i < remainingCards.size(); i++)
+        {
+            bestHand.add(remainingCards.get(i));
+        }
+
+        return bestHand;
+    }
+
+    private static List<Rank> extractRanks(List<Card> currentCards)
+    {
+        return currentCards.stream()
+                           .map(Card::getRank)
+                           .distinct()
+                           .toList();
     }
 }
