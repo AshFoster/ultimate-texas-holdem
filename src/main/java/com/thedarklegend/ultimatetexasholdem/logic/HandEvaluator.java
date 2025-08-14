@@ -25,6 +25,15 @@ public class HandEvaluator
             return generateBestFullHouseHand(trips, pairs);
         }
 
+        EnumMap<Suit, List<Card>> cardsBySuit = getCardsBySuit(allCards);
+
+        List<List<Card>> flushes = getAllFiveCardFlushes(cardsBySuit);
+
+        if (!flushes.isEmpty())
+        {
+            return generateBestFlushHand(flushes);
+        }
+
         if (pairs.size() == 1)
         {
             return generateBestPairHand(allCards, pairs);
@@ -134,6 +143,20 @@ public class HandEvaluator
                                     orderedRanks);
     }
 
+    private static EvaluatedHand generateBestFlushHand(List<List<Card>> flushes)
+    {
+        HandRank handRank = HandRank.FLUSH;
+
+        List<Card> bestHand = flushes.get(0);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
     private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 2);
@@ -165,6 +188,39 @@ public class HandEvaluator
         return groupedRanks;
     }
 
+    private static List<List<Card>> getAllFiveCardFlushes(EnumMap<Suit, List<Card>> cardsBySuit)
+    {
+        List<List<Card>> groupedFlushes = new ArrayList<>();
+        List<Card> flushCards = new ArrayList<>();
+
+        for (Map.Entry<Suit, List<Card>> entry : cardsBySuit.entrySet())
+        {
+            if (entry.getValue().size() >= 5)
+            {
+                flushCards.addAll(entry.getValue());
+            }
+        }
+
+        flushCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
+
+        if (flushCards.size() >= 5)
+        {
+            groupedFlushes.add(flushCards.subList(0, 5));
+        }
+
+        if (flushCards.size() >= 6)
+        {
+            groupedFlushes.add(flushCards.subList(1, 6));
+        }
+
+        if (flushCards.size() == 7)
+        {
+            groupedFlushes.add(flushCards.subList(2, 7));
+        }
+
+        return groupedFlushes;
+    }
+
     private static EnumMap<Rank, List<Card>> getCardsByRank(List<Card> cards)
     {
         EnumMap<Rank, List<Card>> cardsByRank = new EnumMap<>(Rank.class);
@@ -175,6 +231,18 @@ public class HandEvaluator
         }
 
         return cardsByRank;
+    }
+
+    private static EnumMap<Suit, List<Card>> getCardsBySuit(List<Card> cards)
+    {
+        EnumMap<Suit, List<Card>> cardsBySuit = new EnumMap<>(Suit.class);
+
+        for (Card card : cards)
+        {
+            cardsBySuit.computeIfAbsent(card.getSuit(), suit -> new ArrayList<>()).add(card);
+        }
+
+        return cardsBySuit;
     }
 
     private static List<Card> extractBestFiveCards(List<Card> allCards, List<Card> currentCards)

@@ -150,4 +150,22 @@ public class HandEvaluatorTest
         assertEquals(HandRank.FULL_HOUSE, evaluatedHand.getHandRank());
         assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
     }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfFLushAndOrderedRanks_whenProvidedHandContainsAFlush()
+    {
+        List<Card> hand = List.of(new Card(Rank.TWO, Suit.HEARTS),
+                                  new Card(Rank.THREE, Suit.HEARTS),
+                                  new Card(Rank.SEVEN, Suit.HEARTS),
+                                  new Card(Rank.NINE, Suit.HEARTS),
+                                  new Card(Rank.TEN, Suit.HEARTS),
+                                  new Card(Rank.JACK, Suit.HEARTS),
+                                  new Card(Rank.ACE, Suit.HEARTS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.ACE, Rank.JACK, Rank.TEN, Rank.NINE, Rank.SEVEN);
+
+        assertEquals(HandRank.FLUSH, evaluatedHand.getHandRank());
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
 }
