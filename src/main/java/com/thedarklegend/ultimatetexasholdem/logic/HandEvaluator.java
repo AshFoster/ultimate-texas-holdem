@@ -35,6 +35,13 @@ public class HandEvaluator
             return generateBestThreeOfAKindHand(allCards, trips);
         }
 
+        List<List<Card>> quads = getQuads(cardsByRank);
+
+        if (!quads.isEmpty())
+        {
+            return generateBestFourOfAKindHand(allCards, quads);
+        }
+
         return EvaluatedHand.create(HandRank.HIGH_CARD,
                                     allCards.subList(0, 5),
                                     Collections.emptyList());
@@ -90,6 +97,22 @@ public class HandEvaluator
                                     orderedRanks);
     }
 
+    private static EvaluatedHand generateBestFourOfAKindHand(List<Card> allCards,
+                                                             List<List<Card>> quads)
+    {
+        HandRank handRank = HandRank.FOUR_OF_A_KIND;
+
+        List<Card> currentHand = quads.get(0);
+        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
     private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 2);
@@ -98,6 +121,11 @@ public class HandEvaluator
     private static List<List<Card>> getTrips(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 3);
+    }
+
+    private static List<List<Card>> getQuads(EnumMap<Rank, List<Card>> cardsByRank)
+    {
+        return getGroupedRanksBySize(cardsByRank, 4);
     }
 
     private static List<List<Card>> getGroupedRanksBySize(EnumMap<Rank, List<Card>> cardsByRank, int size)
