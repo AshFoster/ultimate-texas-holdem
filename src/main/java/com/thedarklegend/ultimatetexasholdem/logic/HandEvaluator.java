@@ -28,17 +28,26 @@ public class HandEvaluator
         EnumMap<Suit, List<Card>> cardsBySuit = getCardsBySuit(allCards);
 
         List<Card> flushes = getAllFlushCards(cardsBySuit);
-
-        if (!flushes.isEmpty())
-        {
-            return generateBestFlushHand(flushes);
-        }
-
         List<Card> bestStraight = getBestFiveCardStraight(allCards);
+
+        if (!flushes.isEmpty() && !bestStraight.isEmpty())
+        {
+            List<Card> bestStraightFlush = getBestFiveCardStraight(flushes);
+
+            if (!bestStraight.isEmpty())
+            {
+                return generateBestStraightFlushHand(bestStraightFlush);
+            }
+        }
 
         if (!bestStraight.isEmpty())
         {
             return generateBestStraightHand(bestStraight);
+        }
+
+        if (!flushes.isEmpty())
+        {
+            return generateBestFlushHand(flushes);
         }
 
         if (pairs.size() == 1)
@@ -187,6 +196,23 @@ public class HandEvaluator
                                     orderedRanks);
     }
 
+    private static EvaluatedHand generateBestStraightFlushHand(List<Card> straightFlush)
+    {
+        HandRank handRank =
+                straightFlush.get(0).getRank() == Rank.ACE
+                        ? HandRank.ROYAL_FLUSH
+                        : HandRank.STRAIGHT_FLUSH;
+
+        List<Card> bestHand = new ArrayList<>(straightFlush);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
     private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 2);
@@ -236,37 +262,59 @@ public class HandEvaluator
 
     private static List<Card> getBestFiveCardStraight(List<Card> allCards)
     {
-        List<Card> groupedStraights = new ArrayList<>();
-        List<Card> straightCards = new ArrayList<>(allCards);
+        List<Card> bestStraight = new ArrayList<>();
+        List<Card> straightCards = new ArrayList<>();
+        List<Card> allCardsCopy = new ArrayList<>(allCards);
 
-        straightCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
+        allCardsCopy.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
 
-        for (Card card : straightCards)
+        for (Card card : allCardsCopy)
         {
             if (card.getRank() == Rank.ACE)
             {
-                straightCards.add(card);
+                allCardsCopy.add(card);
                 break;
             }
         }
 
-        for (int i = 0; i < straightCards.size() - 1; i++)
+        for (int i = 0; i < allCardsCopy.size(); i++)
         {
-            boolean nextIsNotSequential = straightCards.get(i).getRank().getValue() != straightCards.get(i + 1).getRank().getValue() + 1;
-            boolean isTwoAndNextIsLowAce = straightCards.get(i).getRank() == Rank.TWO && straightCards.get(i + 1).getRank() == Rank.ACE;
-            if (nextIsNotSequential && !isTwoAndNextIsLowAce)
+            boolean isIndexPlusOneInRange = i + 1 < allCardsCopy.size();
+            boolean isNextSameRank = isIndexPlusOneInRange && allCardsCopy.get(i).getRank() == allCardsCopy.get(i + 1).getRank();
+
+            if (isNextSameRank)
             {
-                straightCards.remove(i);
-                i--;
+                continue;
             }
+
+            boolean isPreviousNotSequential = !straightCards.isEmpty()
+                    && allCardsCopy.get(i).getRank().getValue() + 1 != straightCards.get(straightCards.size() - 1).getRank().getValue();
+            boolean isNextNotSequential = isIndexPlusOneInRange
+                    && isPreviousNotSequential
+                    && allCardsCopy.get(i + 1).getRank().getValue() - 1 != allCardsCopy.get(i).getRank().getValue();
+            boolean isLowAceAndPreviousIsTwo = !straightCards.isEmpty()
+                    && allCardsCopy.get(i).getRank() == Rank.ACE
+                    && allCardsCopy.get(i - 1).getRank() == Rank.TWO;
+
+            if (isPreviousNotSequential && isNextNotSequential && !isLowAceAndPreviousIsTwo)
+            {
+                straightCards.clear();
+
+                if (allCardsCopy.size() - i < 5)
+                {
+                    break;
+                }
+            }
+
+            straightCards.add(allCardsCopy.get(i));
         }
 
         if (straightCards.size() >= 5)
         {
-            groupedStraights = straightCards.subList(0, 5);
+            bestStraight = straightCards.subList(0, 5);
         }
 
-        return groupedStraights;
+        return bestStraight;
     }
 
     private static EnumMap<Rank, List<Card>> getCardsByRank(List<Card> cards)

@@ -220,4 +220,40 @@ public class HandEvaluatorTest
         assertEquals(HandRank.STRAIGHT, evaluatedHand.getHandRank());
         assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
     }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfStraightFlushAndOrderedRanks_whenProvidedHandContainsAStraightFlush()
+    {
+        List<Card> hand = List.of(new Card(Rank.ACE, Suit.SPADES),
+                                  new Card(Rank.TWO, Suit.SPADES),
+                                  new Card(Rank.THREE, Suit.SPADES),
+                                  new Card(Rank.FOUR, Suit.SPADES),
+                                  new Card(Rank.FIVE, Suit.SPADES),
+                                  new Card(Rank.SEVEN, Suit.CLUBS),
+                                  new Card(Rank.TEN, Suit.HEARTS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.FIVE, Rank.FOUR, Rank.THREE, Rank.TWO, Rank.ACE);
+
+        assertEquals(HandRank.STRAIGHT_FLUSH, evaluatedHand.getHandRank());
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfRoyalFlushAndOrderedRanks_whenProvidedHandContainsARoyalFlush()
+    {
+        List<Card> hand = List.of(new Card(Rank.TEN, Suit.SPADES),
+                                  new Card(Rank.JACK, Suit.SPADES),
+                                  new Card(Rank.QUEEN, Suit.SPADES),
+                                  new Card(Rank.KING, Suit.SPADES),
+                                  new Card(Rank.ACE, Suit.SPADES),
+                                  new Card(Rank.ACE, Suit.CLUBS),
+                                  new Card(Rank.ACE, Suit.HEARTS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.ACE, Rank.KING, Rank.QUEEN, Rank.JACK, Rank.TEN);
+
+        assertEquals(HandRank.ROYAL_FLUSH, evaluatedHand.getHandRank());
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
 }
