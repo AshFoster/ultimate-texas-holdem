@@ -202,4 +202,22 @@ public class HandEvaluatorTest
         assertEquals(HandRank.STRAIGHT, evaluatedHand.getHandRank());
         assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
     }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfStraightAndOrderedRanks_whenProvidedHandContainsAnAceLowStraight()
+    {
+        List<Card> hand = List.of(new Card(Rank.ACE, Suit.SPADES),
+                                  new Card(Rank.TWO, Suit.HEARTS),
+                                  new Card(Rank.THREE, Suit.SPADES),
+                                  new Card(Rank.FOUR, Suit.DIAMONDS),
+                                  new Card(Rank.FIVE, Suit.DIAMONDS),
+                                  new Card(Rank.SEVEN, Suit.CLUBS),
+                                  new Card(Rank.TEN, Suit.HEARTS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.FIVE, Rank.FOUR, Rank.THREE, Rank.TWO, Rank.ACE);
+
+        assertEquals(HandRank.STRAIGHT, evaluatedHand.getHandRank());
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
 }

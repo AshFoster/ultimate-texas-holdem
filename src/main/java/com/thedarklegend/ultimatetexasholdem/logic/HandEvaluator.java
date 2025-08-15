@@ -34,11 +34,11 @@ public class HandEvaluator
             return generateBestFlushHand(flushes);
         }
 
-        List<List<Card>> straights = getAllFiveCardStraights(cardsByRank);
+        List<Card> bestStraight = getBestFiveCardStraight(cardsByRank);
 
-        if (!straights.isEmpty())
+        if (!bestStraight.isEmpty())
         {
-            return generateBestStraightHand(straights);
+            return generateBestStraightHand(bestStraight);
         }
 
         if (pairs.size() == 1)
@@ -173,11 +173,11 @@ public class HandEvaluator
                                     orderedRanks);
     }
 
-    private static EvaluatedHand generateBestStraightHand(List<List<Card>> straights)
+    private static EvaluatedHand generateBestStraightHand(List<Card> straight)
     {
         HandRank handRank = HandRank.STRAIGHT;
 
-        List<Card> bestHand = straights.get(0);
+        List<Card> bestHand = new ArrayList<>(straight);
         List<Rank> orderedRanks = extractRanks(bestHand);
 
         System.out.println(bestHand);
@@ -234,9 +234,9 @@ public class HandEvaluator
         return flushCards;
     }
 
-    private static List<List<Card>> getAllFiveCardStraights(EnumMap<Rank, List<Card>> cardsByRank)
+    private static List<Card> getBestFiveCardStraight(EnumMap<Rank, List<Card>> cardsByRank)
     {
-        List<List<Card>> groupedStraights = new ArrayList<>();
+        List<Card> groupedStraights = new ArrayList<>();
         List<Card> straightCards = new ArrayList<>();
 
         for (Map.Entry<Rank, List<Card>> entry : cardsByRank.entrySet())
@@ -246,28 +246,25 @@ public class HandEvaluator
 
         straightCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
 
+        if (cardsByRank.containsKey(Rank.ACE) && cardsByRank.containsKey(Rank.FIVE))
+        {
+            straightCards.addAll(cardsByRank.get(Rank.ACE));
+        }
+
         for (int i = 0; i < straightCards.size() - 1; i++)
         {
-            if (straightCards.get(i).getRank().getValue() != straightCards.get(i + 1).getRank().getValue() + 1)
+            boolean nextIsNotSequential = straightCards.get(i).getRank().getValue() != straightCards.get(i + 1).getRank().getValue() + 1;
+            boolean isTwoAndNextIsLowAce = straightCards.get(i).getRank() == Rank.TWO && straightCards.get(i + 1).getRank() == Rank.ACE;
+            if (nextIsNotSequential && !isTwoAndNextIsLowAce)
             {
                 straightCards.remove(i);
-                i = i - 1;
+                i--;
             }
         }
 
         if (straightCards.size() >= 5)
         {
-            groupedStraights.add(straightCards.subList(0, 5));
-        }
-
-        if (straightCards.size() >= 6)
-        {
-            groupedStraights.add(straightCards.subList(1, 6));
-        }
-
-        if (straightCards.size() == 7)
-        {
-            groupedStraights.add(straightCards.subList(2, 7));
+            groupedStraights = straightCards.subList(0, 5);
         }
 
         return groupedStraights;
