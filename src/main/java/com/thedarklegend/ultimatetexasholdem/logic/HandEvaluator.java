@@ -34,7 +34,7 @@ public class HandEvaluator
             return generateBestFlushHand(flushes);
         }
 
-        List<Card> bestStraight = getBestFiveCardStraight(cardsByRank);
+        List<Card> bestStraight = getBestFiveCardStraight(allCards);
 
         if (!bestStraight.isEmpty())
         {
@@ -234,21 +234,20 @@ public class HandEvaluator
         return flushCards;
     }
 
-    private static List<Card> getBestFiveCardStraight(EnumMap<Rank, List<Card>> cardsByRank)
+    private static List<Card> getBestFiveCardStraight(List<Card> allCards)
     {
         List<Card> groupedStraights = new ArrayList<>();
-        List<Card> straightCards = new ArrayList<>();
-
-        for (Map.Entry<Rank, List<Card>> entry : cardsByRank.entrySet())
-        {
-            straightCards.addAll(entry.getValue());
-        }
+        List<Card> straightCards = new ArrayList<>(allCards);
 
         straightCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
 
-        if (cardsByRank.containsKey(Rank.ACE) && cardsByRank.containsKey(Rank.FIVE))
+        for (Card card : straightCards)
         {
-            straightCards.addAll(cardsByRank.get(Rank.ACE));
+            if (card.getRank() == Rank.ACE)
+            {
+                straightCards.add(card);
+                break;
+            }
         }
 
         for (int i = 0; i < straightCards.size() - 1; i++)
