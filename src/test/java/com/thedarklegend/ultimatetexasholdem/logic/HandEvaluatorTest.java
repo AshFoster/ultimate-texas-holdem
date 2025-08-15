@@ -256,4 +256,27 @@ public class HandEvaluatorTest
         assertEquals(HandRank.ROYAL_FLUSH, evaluatedHand.getHandRank());
         assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
     }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfHighCardAndBestKickersAndOrderedRanks_whenProvidedHandContainsNothingBetter()
+    {
+        List<Card> hand = List.of(new Card(Rank.TWO, Suit.SPADES),
+                                  new Card(Rank.SIX, Suit.CLUBS),
+                                  new Card(Rank.THREE, Suit.SPADES),
+                                  new Card(Rank.QUEEN, Suit.DIAMONDS),
+                                  new Card(Rank.ACE, Suit.SPADES),
+                                  new Card(Rank.JACK, Suit.CLUBS),
+                                  new Card(Rank.FIVE, Suit.DIAMONDS));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.ACE, Rank.QUEEN, Rank.JACK, Rank.SIX, Rank.FIVE);
+
+        assertEquals(HandRank.HIGH_CARD, evaluatedHand.getHandRank());
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.ACE, Suit.SPADES)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.QUEEN, Suit.DIAMONDS)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.JACK, Suit.CLUBS)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.SIX, Suit.CLUBS)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.FIVE, Suit.DIAMONDS)));
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
 }

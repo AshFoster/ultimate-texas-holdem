@@ -72,9 +72,7 @@ public class HandEvaluator
             return generateBestFourOfAKindHand(allCards, quads);
         }
 
-        return EvaluatedHand.create(HandRank.HIGH_CARD,
-                                    allCards.subList(0, 5),
-                                    Collections.emptyList());
+        return generateBestHighCardHand(allCards);
     }
 
     private static EvaluatedHand generateBestPairHand(List<Card> allCards,
@@ -204,6 +202,20 @@ public class HandEvaluator
                         : HandRank.STRAIGHT_FLUSH;
 
         List<Card> bestHand = new ArrayList<>(straightFlush);
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+        return EvaluatedHand.create(handRank,
+                                    bestHand,
+                                    orderedRanks);
+    }
+
+    private static EvaluatedHand generateBestHighCardHand(List<Card> allCards)
+    {
+        HandRank handRank = HandRank.HIGH_CARD;
+
+        List<Card> bestHand = extractBestFiveCards(allCards, Collections.emptyList());
         List<Rank> orderedRanks = extractRanks(bestHand);
 
         System.out.println(bestHand);
