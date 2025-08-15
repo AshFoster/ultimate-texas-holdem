@@ -27,7 +27,7 @@ public class HandEvaluator
 
         EnumMap<Suit, List<Card>> cardsBySuit = getCardsBySuit(allCards);
 
-        List<List<Card>> flushes = getAllFiveCardFlushes(cardsBySuit);
+        List<Card> flushes = getAllFlushCards(cardsBySuit);
 
         if (!flushes.isEmpty())
         {
@@ -159,11 +159,11 @@ public class HandEvaluator
                                     orderedRanks);
     }
 
-    private static EvaluatedHand generateBestFlushHand(List<List<Card>> flushes)
+    private static EvaluatedHand generateBestFlushHand(List<Card> flushes)
     {
         HandRank handRank = HandRank.FLUSH;
 
-        List<Card> bestHand = flushes.get(0);
+        List<Card> bestHand = flushes.subList(0, 5);
         List<Rank> orderedRanks = extractRanks(bestHand);
 
         System.out.println(bestHand);
@@ -218,9 +218,8 @@ public class HandEvaluator
         return groupedRanks;
     }
 
-    private static List<List<Card>> getAllFiveCardFlushes(EnumMap<Suit, List<Card>> cardsBySuit)
+    private static List<Card> getAllFlushCards(EnumMap<Suit, List<Card>> cardsBySuit)
     {
-        List<List<Card>> groupedFlushes = new ArrayList<>();
         List<Card> flushCards = new ArrayList<>();
 
         for (Map.Entry<Suit, List<Card>> entry : cardsBySuit.entrySet())
@@ -232,23 +231,7 @@ public class HandEvaluator
         }
 
         flushCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
-
-        if (flushCards.size() >= 5)
-        {
-            groupedFlushes.add(flushCards.subList(0, 5));
-        }
-
-        if (flushCards.size() >= 6)
-        {
-            groupedFlushes.add(flushCards.subList(1, 6));
-        }
-
-        if (flushCards.size() == 7)
-        {
-            groupedFlushes.add(flushCards.subList(2, 7));
-        }
-
-        return groupedFlushes;
+        return flushCards;
     }
 
     private static List<List<Card>> getAllFiveCardStraights(EnumMap<Rank, List<Card>> cardsByRank)
