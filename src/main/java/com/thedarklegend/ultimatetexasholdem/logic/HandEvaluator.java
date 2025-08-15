@@ -75,154 +75,88 @@ public class HandEvaluator
         return generateBestHighCardHand(allCards);
     }
 
-    private static EvaluatedHand generateBestPairHand(List<Card> allCards,
-                                                      List<List<Card>> pairs)
+    private static EvaluatedHand buildHand(HandRank handRank,
+                                           List<Card> allCards,
+                                           List<Card> startingCards)
     {
-        HandRank handRank = HandRank.PAIR;
+        boolean needsKickers = startingCards.size() < 5;
+        List<Card> bestHand = needsKickers
+                ? extractBestFiveCards(allCards, startingCards)
+                : new ArrayList<>(startingCards);
 
-        List<Card> currentHand = pairs.get(0);
-        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
         List<Rank> orderedRanks = extractRanks(bestHand);
 
         System.out.println(bestHand);
         System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+
+        return EvaluatedHand.create(handRank, bestHand, orderedRanks);
+    }
+    private static EvaluatedHand generateBestPairHand(List<Card> allCards,
+                                                      List<List<Card>> pairs)
+    {
+        return buildHand(HandRank.PAIR, allCards, pairs.get(0));
     }
 
     private static EvaluatedHand generateBestTwoPairHand(List<Card> allCards,
                                                          List<List<Card>> pairs)
     {
-        HandRank handRank = HandRank.TWO_PAIR;
+        List<Card> twoPairs = new ArrayList<>(pairs.get(0));
+        twoPairs.addAll(pairs.get(1));
 
-        List<Card> currentHand = pairs.get(0);
-        currentHand.addAll(pairs.get(1));
-
-        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(HandRank.TWO_PAIR, allCards, twoPairs);
     }
 
     private static EvaluatedHand generateBestThreeOfAKindHand(List<Card> allCards,
                                                               List<List<Card>> trips)
     {
-        HandRank handRank = HandRank.THREE_OF_A_KIND;
-
-        List<Card> currentHand = trips.get(0);
-        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(HandRank.THREE_OF_A_KIND, allCards, trips.get(0));
     }
 
     private static EvaluatedHand generateBestFourOfAKindHand(List<Card> allCards,
                                                              List<List<Card>> quads)
     {
-        HandRank handRank = HandRank.FOUR_OF_A_KIND;
-
-        List<Card> currentHand = quads.get(0);
-        List<Card> bestHand = extractBestFiveCards(allCards, currentHand);
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(HandRank.FOUR_OF_A_KIND, allCards, quads.get(0));
     }
 
     private static EvaluatedHand generateBestFullHouseHand(List<List<Card>> trips,
                                                            List<List<Card>> pairs)
     {
-        HandRank handRank = HandRank.FULL_HOUSE;
-
-        List<Card> bestHand = trips.get(0);
+        List<Card> fullHouse = new ArrayList<>(trips.get(0));
 
         if (trips.size() > 1)
         {
-            bestHand.addAll(trips.get(1).subList(0,2));
+            fullHouse.addAll(trips.get(1).subList(0,2));
         }
         else
         {
-            bestHand.addAll(pairs.get(0));
+            fullHouse.addAll(pairs.get(0));
         }
 
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(HandRank.FULL_HOUSE, fullHouse, fullHouse);
     }
 
     private static EvaluatedHand generateBestFlushHand(List<Card> flushes)
     {
-        HandRank handRank = HandRank.FLUSH;
-
-        List<Card> bestHand = flushes.subList(0, 5);
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(HandRank.FLUSH, null, flushes.subList(0, 5));
     }
 
     private static EvaluatedHand generateBestStraightHand(List<Card> straight)
     {
-        HandRank handRank = HandRank.STRAIGHT;
-
-        List<Card> bestHand = new ArrayList<>(straight);
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(HandRank.STRAIGHT, null, straight);
     }
 
     private static EvaluatedHand generateBestStraightFlushHand(List<Card> straightFlush)
     {
-        HandRank handRank =
-                straightFlush.get(0).getRank() == Rank.ACE
-                        ? HandRank.ROYAL_FLUSH
-                        : HandRank.STRAIGHT_FLUSH;
+        HandRank handRank = straightFlush.get(0).getRank() == Rank.ACE
+                ? HandRank.ROYAL_FLUSH
+                : HandRank.STRAIGHT_FLUSH;
 
-        List<Card> bestHand = new ArrayList<>(straightFlush);
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(handRank, null, straightFlush);
     }
 
     private static EvaluatedHand generateBestHighCardHand(List<Card> allCards)
     {
-        HandRank handRank = HandRank.HIGH_CARD;
-
-        List<Card> bestHand = extractBestFiveCards(allCards, Collections.emptyList());
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-        return EvaluatedHand.create(handRank,
-                                    bestHand,
-                                    orderedRanks);
+        return buildHand(HandRank.HIGH_CARD, allCards, Collections.emptyList());
     }
 
     private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
