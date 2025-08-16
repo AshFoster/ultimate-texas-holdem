@@ -3,10 +3,34 @@ package com.thedarklegend.ultimatetexasholdem.logic;
 import com.thedarklegend.ultimatetexasholdem.model.*;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class HandEvaluator
 {
     public static EvaluatedHand evaluate(List<Card> allCards)
+    {
+        validateCards(allCards);
+
+        EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(allCards);
+        List<List<Card>> pairs = getPairs(cardsByRank);
+        List<List<Card>> trips = getTrips(cardsByRank);
+        List<List<Card>> quads = getQuads(cardsByRank);
+
+        List<Card> bestStraight = getBestFiveCardStraight(allCards);
+        List<Card> flushes = getAllFlushCards(allCards);
+
+        return getFirstNonNull(() -> generateBestStraightFlushHand(flushes, bestStraight),
+                               () -> generateBestFourOfAKindHand(allCards, quads),
+                               () -> generateBestFullHouseHand(trips, pairs),
+                               () -> generateBestFlushHand(flushes),
+                               () -> generateBestStraightHand(bestStraight),
+                               () -> generateBestThreeOfAKindHand(allCards, trips),
+                               () -> generateBestTwoPairHand(allCards, pairs),
+                               () -> generateBestPairHand(allCards, pairs),
+                               () -> generateBestHighCardHand(allCards));
+    }
+
+    private static void validateCards(List<Card> allCards)
     {
         Objects.requireNonNull(allCards, "Hand cannot be null!");
 
@@ -14,113 +38,62 @@ public class HandEvaluator
         {
             throw new IllegalArgumentException("evaluate() requires exactly 7 cards but got " + allCards.size());
         }
+    }
 
-        EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(allCards);
-
-        List<List<Card>> pairs = getPairs(cardsByRank);
-        List<List<Card>> trips = getTrips(cardsByRank);
-
-        if ((!pairs.isEmpty() && !trips.isEmpty()) || trips.size() > 1)
+    @SafeVarargs
+    private static <T> T getFirstNonNull(Supplier<T>... suppliers)
+    {
+        for (Supplier<T> supplier : suppliers)
         {
-            return generateBestFullHouseHand(trips, pairs);
-        }
-
-        EnumMap<Suit, List<Card>> cardsBySuit = getCardsBySuit(allCards);
-
-        List<Card> flushes = getAllFlushCards(cardsBySuit);
-        List<Card> bestStraight = getBestFiveCardStraight(allCards);
-
-        if (!flushes.isEmpty() && !bestStraight.isEmpty())
-        {
-            List<Card> bestStraightFlush = getBestFiveCardStraight(flushes);
-
-            if (!bestStraight.isEmpty())
+            T result = supplier.get();
+            if (result != null)
             {
-                return generateBestStraightFlushHand(bestStraightFlush);
+                return result;
             }
         }
 
-        if (!bestStraight.isEmpty())
-        {
-            return generateBestStraightHand(bestStraight);
-        }
-
-        if (!flushes.isEmpty())
-        {
-            return generateBestFlushHand(flushes);
-        }
-
-        if (pairs.size() == 1)
-        {
-            return generateBestPairHand(allCards, pairs);
-        }
-
-        if (pairs.size() >= 2)
-        {
-            return generateBestTwoPairHand(allCards, pairs);
-        }
-
-        if (!trips.isEmpty())
-        {
-            return generateBestThreeOfAKindHand(allCards, trips);
-        }
-
-        List<List<Card>> quads = getQuads(cardsByRank);
-
-        if (!quads.isEmpty())
-        {
-            return generateBestFourOfAKindHand(allCards, quads);
-        }
-
-        return generateBestHighCardHand(allCards);
+        return null;
     }
 
-    private static EvaluatedHand buildHand(HandRank handRank,
-                                           List<Card> allCards,
-                                           List<Card> startingCards)
+    private static EvaluatedHand generateBestStraightFlushHand(List<Card> flushes, List<Card> bestStraight)
     {
-        boolean needsKickers = startingCards.size() < 5;
-        List<Card> bestHand = needsKickers
-                ? extractBestFiveCards(allCards, startingCards)
-                : new ArrayList<>(startingCards);
+        if (flushes.isEmpty() && bestStraight.isEmpty())
+        {
+            return null;
+        }
 
-        List<Rank> orderedRanks = extractRanks(bestHand);
+        List<Card> bestStraightFlush = getBestFiveCardStraight(flushes);
 
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
+        if (bestStraightFlush.isEmpty())
+        {
+            return null;
+        }
 
-        return EvaluatedHand.create(handRank, bestHand, orderedRanks);
-    }
-    private static EvaluatedHand generateBestPairHand(List<Card> allCards,
-                                                      List<List<Card>> pairs)
-    {
-        return buildHand(HandRank.PAIR, allCards, pairs.get(0));
-    }
+        HandRank handRank = bestStraightFlush.get(0).getRank() == Rank.ACE ? HandRank.ROYAL_FLUSH
+                                                                           : HandRank.STRAIGHT_FLUSH;
 
-    private static EvaluatedHand generateBestTwoPairHand(List<Card> allCards,
-                                                         List<List<Card>> pairs)
-    {
-        List<Card> twoPairs = new ArrayList<>(pairs.get(0));
-        twoPairs.addAll(pairs.get(1));
-
-        return buildHand(HandRank.TWO_PAIR, allCards, twoPairs);
-    }
-
-    private static EvaluatedHand generateBestThreeOfAKindHand(List<Card> allCards,
-                                                              List<List<Card>> trips)
-    {
-        return buildHand(HandRank.THREE_OF_A_KIND, allCards, trips.get(0));
+        return buildHand(handRank, null, bestStraightFlush);
     }
 
     private static EvaluatedHand generateBestFourOfAKindHand(List<Card> allCards,
                                                              List<List<Card>> quads)
     {
+        if (quads.isEmpty())
+        {
+            return null;
+        }
+
         return buildHand(HandRank.FOUR_OF_A_KIND, allCards, quads.get(0));
     }
 
     private static EvaluatedHand generateBestFullHouseHand(List<List<Card>> trips,
                                                            List<List<Card>> pairs)
     {
+        if (trips.isEmpty() || (pairs.isEmpty() && trips.size() < 2))
+        {
+            return null;
+        }
+
         List<Card> fullHouse = new ArrayList<>(trips.get(0));
 
         if (trips.size() > 1)
@@ -132,26 +105,69 @@ public class HandEvaluator
             fullHouse.addAll(pairs.get(0));
         }
 
-        return buildHand(HandRank.FULL_HOUSE, fullHouse, fullHouse);
+        return buildHand(HandRank.FULL_HOUSE, null, fullHouse);
     }
 
     private static EvaluatedHand generateBestFlushHand(List<Card> flushes)
     {
+        if (flushes.isEmpty())
+        {
+            return null;
+        }
+
         return buildHand(HandRank.FLUSH, null, flushes.subList(0, 5));
     }
 
     private static EvaluatedHand generateBestStraightHand(List<Card> straight)
     {
+        if (straight.isEmpty())
+        {
+            return null;
+        }
+
         return buildHand(HandRank.STRAIGHT, null, straight);
     }
 
-    private static EvaluatedHand generateBestStraightFlushHand(List<Card> straightFlush)
+    private static EvaluatedHand generateBestThreeOfAKindHand(List<Card> allCards,
+                                                              List<List<Card>> trips)
     {
-        HandRank handRank = straightFlush.get(0).getRank() == Rank.ACE
-                ? HandRank.ROYAL_FLUSH
-                : HandRank.STRAIGHT_FLUSH;
+        if (trips.isEmpty())
+        {
+            return null;
+        }
 
-        return buildHand(handRank, null, straightFlush);
+        return buildHand(HandRank.THREE_OF_A_KIND, allCards, trips.get(0));
+    }
+
+    private static EvaluatedHand generateBestTwoPairHand(List<Card> allCards,
+                                                         List<List<Card>> pairs)
+    {
+        if (pairs.isEmpty())
+        {
+            return null;
+        }
+
+        List<Card> twoPairs = new ArrayList<>(pairs.get(0));
+
+        if (pairs.size() < 2)
+        {
+            return null;
+        }
+
+        twoPairs.addAll(pairs.get(1));
+
+        return buildHand(HandRank.TWO_PAIR, allCards, twoPairs);
+    }
+
+    private static EvaluatedHand generateBestPairHand(List<Card> allCards,
+                                                      List<List<Card>> pairs)
+    {
+        if (pairs.isEmpty())
+        {
+            return null;
+        }
+
+        return buildHand(HandRank.PAIR, allCards, pairs.get(0));
     }
 
     private static EvaluatedHand generateBestHighCardHand(List<Card> allCards)
@@ -159,39 +175,14 @@ public class HandEvaluator
         return buildHand(HandRank.HIGH_CARD, allCards, Collections.emptyList());
     }
 
-    private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
-    {
-        return getGroupedRanksBySize(cardsByRank, 2);
-    }
-
-    private static List<List<Card>> getTrips(EnumMap<Rank, List<Card>> cardsByRank)
-    {
-        return getGroupedRanksBySize(cardsByRank, 3);
-    }
-
     private static List<List<Card>> getQuads(EnumMap<Rank, List<Card>> cardsByRank)
     {
         return getGroupedRanksBySize(cardsByRank, 4);
     }
 
-    private static List<List<Card>> getGroupedRanksBySize(EnumMap<Rank, List<Card>> cardsByRank, int size)
+    private static List<Card> getAllFlushCards(List<Card> allCards)
     {
-        List<List<Card>> groupedRanks = new ArrayList<>();
-
-        for (Map.Entry<Rank, List<Card>> entry : cardsByRank.entrySet())
-        {
-            if (entry.getValue().size() == size)
-            {
-                groupedRanks.add(entry.getValue());
-            }
-        }
-
-        groupedRanks.sort((a, b) -> b.get(0).getRank().getValue() - a.get(0).getRank().getValue());
-        return groupedRanks;
-    }
-
-    private static List<Card> getAllFlushCards(EnumMap<Suit, List<Card>> cardsBySuit)
-    {
+        EnumMap<Suit, List<Card>> cardsBySuit = getCardsBySuit(allCards);
         List<Card> flushCards = new ArrayList<>();
 
         for (Map.Entry<Suit, List<Card>> entry : cardsBySuit.entrySet())
@@ -261,6 +252,48 @@ public class HandEvaluator
         }
 
         return bestStraight;
+    }
+
+    private static List<List<Card>> getTrips(EnumMap<Rank, List<Card>> cardsByRank)
+    {
+        return getGroupedRanksBySize(cardsByRank, 3);
+    }
+
+    private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
+    {
+        return getGroupedRanksBySize(cardsByRank, 2);
+    }
+
+    private static EvaluatedHand buildHand(HandRank handRank,
+                                           List<Card> allCards,
+                                           List<Card> startingCards)
+    {
+        boolean needsKickers = startingCards.size() < 5;
+        List<Card> bestHand = needsKickers ? extractBestFiveCards(allCards, startingCards)
+                                           : new ArrayList<>(startingCards);
+
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+
+        return EvaluatedHand.create(handRank, bestHand, orderedRanks);
+    }
+
+    private static List<List<Card>> getGroupedRanksBySize(EnumMap<Rank, List<Card>> cardsByRank, int size)
+    {
+        List<List<Card>> groupedRanks = new ArrayList<>();
+
+        for (Map.Entry<Rank, List<Card>> entry : cardsByRank.entrySet())
+        {
+            if (entry.getValue().size() == size)
+            {
+                groupedRanks.add(entry.getValue());
+            }
+        }
+
+        groupedRanks.sort((a, b) -> b.get(0).getRank().getValue() - a.get(0).getRank().getValue());
+        return groupedRanks;
     }
 
     private static EnumMap<Rank, List<Card>> getCardsByRank(List<Card> cards)
