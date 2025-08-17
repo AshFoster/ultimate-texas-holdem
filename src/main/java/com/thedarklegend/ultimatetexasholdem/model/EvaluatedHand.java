@@ -3,7 +3,7 @@ package com.thedarklegend.ultimatetexasholdem.model;
 import java.util.List;
 import java.util.Objects;
 
-public class EvaluatedHand
+public class EvaluatedHand implements Comparable<EvaluatedHand>
 {
     private final HandRank handRank;
     private final List<Card> hand;
@@ -43,5 +43,28 @@ public class EvaluatedHand
     public List<Rank> getOrderedRanks()
     {
         return orderedRanks;
+    }
+
+    @Override
+    public int compareTo(EvaluatedHand o)
+    {
+        int handRankComparison = Integer.compare(this.handRank.getValue(),
+                                                 o.handRank.getValue());
+        if (handRankComparison != 0)
+        {
+            return handRankComparison;
+        }
+
+        for (int i = 0; i < this.orderedRanks.size(); i++)
+        {
+            int orderedRankComparison = Integer.compare(this.orderedRanks.get(i).getValue(),
+                                                        o.orderedRanks.get(i).getValue());
+            if (orderedRankComparison != 0)
+            {
+                return orderedRankComparison;
+            }
+        }
+
+        return 0;
     }
 }
