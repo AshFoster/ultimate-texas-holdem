@@ -6,20 +6,22 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.thedarklegend.ultimatetexasholdem.logic.HandEvaluatorUtils.*;
+
 public class HandEvaluator
 {
     public static EvaluatedHand evaluate(List<Card> allCards)
     {
         validateCards(allCards);
 
-        EnumMap<Rank, List<Card>> cardsByRank = getCardsByRank(allCards);
-        List<List<Card>> pairs = getPairs(cardsByRank);
-        List<List<Card>> trips = getTrips(cardsByRank);
-        List<List<Card>> quads = getQuads(cardsByRank);
+        EnumMap<Rank, List<Card>> cardsByRank = groupCardsByRank(allCards);
+        List<List<Card>> pairs = extractPairs(cardsByRank);
+        List<List<Card>> trips = extractTrips(cardsByRank);
+        List<List<Card>> quads = extractQuads(cardsByRank);
 
-        List<Card> flushes = getAllFlushCards(allCards);
-        List<Card> bestStraight = getBestFiveCardStraight(allCards);
-        List<Card> bestStraightFlush = getBestFiveCardStraight(flushes);
+        List<Card> flushes = extractAllFlushCards(allCards);
+        List<Card> bestStraight = extractBestFiveCardStraight(allCards);
+        List<Card> bestStraightFlush = extractBestFiveCardStraight(flushes);
 
         return Stream.<Supplier<EvaluatedHand>>
                              of(() -> generateBestStraightFlushHand(bestStraightFlush),
@@ -45,6 +47,22 @@ public class HandEvaluator
         {
             throw new IllegalArgumentException("evaluate() requires exactly 7 cards but got " + allCards.size());
         }
+    }
+
+    private static EvaluatedHand buildHand(HandRank handRank,
+                                           List<Card> allCards,
+                                           List<Card> startingCards)
+    {
+        boolean needsKickers = startingCards.size() < 5;
+        List<Card> bestHand = needsKickers ? extractBestFiveCards(allCards, startingCards)
+                                           : new ArrayList<>(startingCards);
+
+        List<Rank> orderedRanks = extractRanks(bestHand);
+
+        System.out.println(bestHand);
+        System.out.println(orderedRanks);
+
+        return EvaluatedHand.create(handRank, bestHand, orderedRanks);
     }
 
     private static EvaluatedHand generateBestStraightFlushHand(List<Card> bestStraightFlush)
@@ -158,181 +176,5 @@ public class HandEvaluator
     private static EvaluatedHand generateBestHighCardHand(List<Card> allCards)
     {
         return buildHand(HandRank.HIGH_CARD, allCards, Collections.emptyList());
-    }
-
-    private static List<List<Card>> getQuads(EnumMap<Rank, List<Card>> cardsByRank)
-    {
-        return getGroupedRanksBySize(cardsByRank, 4);
-    }
-
-    private static List<Card> getAllFlushCards(List<Card> allCards)
-    {
-        EnumMap<Suit, List<Card>> cardsBySuit = getCardsBySuit(allCards);
-        List<Card> flushCards = new ArrayList<>();
-
-        for (Map.Entry<Suit, List<Card>> entry : cardsBySuit.entrySet())
-        {
-            if (entry.getValue().size() >= 5)
-            {
-                flushCards.addAll(entry.getValue());
-            }
-        }
-
-        flushCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
-        return flushCards;
-    }
-
-    private static List<Card> getBestFiveCardStraight(List<Card> allCards)
-    {
-        List<Card> bestStraight = new ArrayList<>();
-        List<Card> straightCards = new ArrayList<>();
-        List<Card> allCardsCopy = new ArrayList<>(allCards);
-
-        allCardsCopy.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
-
-        for (Card card : allCardsCopy)
-        {
-            if (card.getRank() == Rank.ACE)
-            {
-                allCardsCopy.add(card);
-                break;
-            }
-        }
-
-        for (int i = 0; i < allCardsCopy.size(); i++)
-        {
-            boolean isIndexPlusOneInRange = i + 1 < allCardsCopy.size();
-            boolean isNextSameRank = isIndexPlusOneInRange && allCardsCopy.get(i).getRank() == allCardsCopy.get(i + 1).getRank();
-
-            if (isNextSameRank)
-            {
-                continue;
-            }
-
-            boolean isPreviousNotSequential = !straightCards.isEmpty()
-                    && allCardsCopy.get(i).getRank().getValue() + 1 != straightCards.get(straightCards.size() - 1).getRank().getValue();
-            boolean isNextNotSequential = isIndexPlusOneInRange
-                    && isPreviousNotSequential
-                    && allCardsCopy.get(i + 1).getRank().getValue() - 1 != allCardsCopy.get(i).getRank().getValue();
-            boolean isLowAceAndPreviousIsTwo = !straightCards.isEmpty()
-                    && allCardsCopy.get(i).getRank() == Rank.ACE
-                    && allCardsCopy.get(i - 1).getRank() == Rank.TWO;
-
-            if (isPreviousNotSequential && isNextNotSequential && !isLowAceAndPreviousIsTwo)
-            {
-                straightCards.clear();
-
-                if (allCardsCopy.size() - i < 5)
-                {
-                    break;
-                }
-            }
-
-            straightCards.add(allCardsCopy.get(i));
-        }
-
-        if (straightCards.size() >= 5)
-        {
-            bestStraight = straightCards.subList(0, 5);
-        }
-
-        return bestStraight;
-    }
-
-    private static List<List<Card>> getTrips(EnumMap<Rank, List<Card>> cardsByRank)
-    {
-        return getGroupedRanksBySize(cardsByRank, 3);
-    }
-
-    private static List<List<Card>> getPairs(EnumMap<Rank, List<Card>> cardsByRank)
-    {
-        return getGroupedRanksBySize(cardsByRank, 2);
-    }
-
-    private static EvaluatedHand buildHand(HandRank handRank,
-                                           List<Card> allCards,
-                                           List<Card> startingCards)
-    {
-        boolean needsKickers = startingCards.size() < 5;
-        List<Card> bestHand = needsKickers ? extractBestFiveCards(allCards, startingCards)
-                                           : new ArrayList<>(startingCards);
-
-        List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
-
-        return EvaluatedHand.create(handRank, bestHand, orderedRanks);
-    }
-
-    private static List<List<Card>> getGroupedRanksBySize(EnumMap<Rank, List<Card>> cardsByRank, int size)
-    {
-        List<List<Card>> groupedRanks = new ArrayList<>();
-
-        for (Map.Entry<Rank, List<Card>> entry : cardsByRank.entrySet())
-        {
-            if (entry.getValue().size() == size)
-            {
-                groupedRanks.add(entry.getValue());
-            }
-        }
-
-        groupedRanks.sort((a, b) -> b.get(0).getRank().getValue() - a.get(0).getRank().getValue());
-        return groupedRanks;
-    }
-
-    private static EnumMap<Rank, List<Card>> getCardsByRank(List<Card> cards)
-    {
-        EnumMap<Rank, List<Card>> cardsByRank = new EnumMap<>(Rank.class);
-
-        for (Card card : cards)
-        {
-            cardsByRank.computeIfAbsent(card.getRank(), rank -> new ArrayList<>()).add(card);
-        }
-
-        return cardsByRank;
-    }
-
-    private static EnumMap<Suit, List<Card>> getCardsBySuit(List<Card> cards)
-    {
-        EnumMap<Suit, List<Card>> cardsBySuit = new EnumMap<>(Suit.class);
-
-        for (Card card : cards)
-        {
-            cardsBySuit.computeIfAbsent(card.getSuit(), suit -> new ArrayList<>()).add(card);
-        }
-
-        return cardsBySuit;
-    }
-
-    private static List<Card> extractBestFiveCards(List<Card> allCards, List<Card> currentCards)
-    {
-        int kickerCount = 5 - currentCards.size();
-        List<Card> remainingCards = new ArrayList<>();
-        List<Card> bestHand = new ArrayList<>(currentCards);
-        for (Card card : allCards)
-        {
-            if (!currentCards.contains(card))
-            {
-                remainingCards.add(card);
-            }
-        }
-
-        remainingCards.sort((a, b) -> b.getRank().getValue() - a.getRank().getValue());
-
-        for (int i = 0; i < kickerCount && i < remainingCards.size(); i++)
-        {
-            bestHand.add(remainingCards.get(i));
-        }
-
-        return bestHand;
-    }
-
-    private static List<Rank> extractRanks(List<Card> currentCards)
-    {
-        return currentCards.stream()
-                           .map(Card::getRank)
-                           .distinct()
-                           .toList();
     }
 }
