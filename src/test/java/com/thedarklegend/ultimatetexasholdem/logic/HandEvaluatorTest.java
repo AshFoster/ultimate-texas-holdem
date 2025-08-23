@@ -279,4 +279,26 @@ public class HandEvaluatorTest
         assertTrue(evaluatedHand.getHand().contains(new Card(Rank.FIVE, Suit.DIAMONDS)));
         assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
     }
+
+    @Test
+    void evaluateShouldReturnAnEvaluatedHandWithHandRankOfHighCardAndBestKickersAndOrderedRanks_whenProvidedHandContainsNothingBetter_v2()
+    {
+        List<Card> hand = List.of(new Card(Rank.SEVEN, Suit.CLUBS),
+                                  new Card(Rank.TWO, Suit.DIAMONDS),
+                                  new Card(Rank.KING, Suit.HEARTS),
+                                  new Card(Rank.EIGHT, Suit.HEARTS),
+                                  new Card(Rank.NINE, Suit.SPADES),
+                                  new Card(Rank.QUEEN, Suit.SPADES),
+                                  new Card(Rank.TEN, Suit.SPADES));
+
+        EvaluatedHand evaluatedHand = HandEvaluator.evaluate(hand);
+        List<Rank> orderedRanks = List.of(Rank.KING, Rank.QUEEN, Rank.TEN, Rank.NINE, Rank.EIGHT);
+
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.KING, Suit.HEARTS)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.QUEEN, Suit.SPADES)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.TEN, Suit.SPADES)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.NINE, Suit.SPADES)));
+        assertTrue(evaluatedHand.getHand().contains(new Card(Rank.EIGHT, Suit.HEARTS)));
+        assertEquals(evaluatedHand.getOrderedRanks(), orderedRanks);
+    }
 }

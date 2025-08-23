@@ -110,26 +110,28 @@ class HandEvaluatorUtils
                 continue;
             }
 
-            boolean isPreviousNotSequential = !straightCards.isEmpty()
-                    && allCardsCopy.get(i).getRank().getValue() + 1 != straightCards.get(straightCards.size() - 1).getRank().getValue();
-            boolean isNextNotSequential = isIndexPlusOneInRange
-                    && isPreviousNotSequential
-                    && allCardsCopy.get(i + 1).getRank().getValue() - 1 != allCardsCopy.get(i).getRank().getValue();
             boolean isLowAceAndPreviousIsTwo = !straightCards.isEmpty()
                     && allCardsCopy.get(i).getRank() == Rank.ACE
                     && allCardsCopy.get(i - 1).getRank() == Rank.TWO;
+            boolean isPreviousSequential = isLowAceAndPreviousIsTwo
+                    || !straightCards.isEmpty()
+                    && allCardsCopy.get(i).getRank().getValue() + 1 == straightCards.get(straightCards.size() - 1).getRank().getValue();
+            boolean isNextSequential = isIndexPlusOneInRange
+                    && allCardsCopy.get(i + 1).getRank().getValue() + 1 == allCardsCopy.get(i).getRank().getValue();
 
-            if (isPreviousNotSequential && isNextNotSequential && !isLowAceAndPreviousIsTwo)
+            if (isPreviousSequential || (isNextSequential && straightCards.isEmpty()))
             {
-                straightCards.clear();
-
-                if (allCardsCopy.size() - i < 5)
-                {
-                    break;
-                }
+                straightCards.add(allCardsCopy.get(i));
+                continue;
             }
 
-            straightCards.add(allCardsCopy.get(i));
+            if (allCardsCopy.size() - i > 5)
+            {
+                straightCards.clear();
+                continue;
+            }
+
+            break;
         }
 
         if (straightCards.size() >= 5)
