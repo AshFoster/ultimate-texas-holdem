@@ -50,6 +50,13 @@ public class HandEvaluator
     }
 
     private static EvaluatedHand buildHand(HandRank handRank,
+                                           List<Card> startingCards)
+
+    {
+        return buildHand(handRank, null, startingCards);
+    }
+
+    private static EvaluatedHand buildHand(HandRank handRank,
                                            List<Card> allCards,
                                            List<Card> startingCards)
     {
@@ -58,9 +65,6 @@ public class HandEvaluator
                                            : new ArrayList<>(startingCards);
 
         List<Rank> orderedRanks = extractRanks(bestHand);
-
-        System.out.println(bestHand);
-        System.out.println(orderedRanks);
 
         return EvaluatedHand.create(handRank, bestHand, orderedRanks);
     }
@@ -75,7 +79,7 @@ public class HandEvaluator
         HandRank handRank = bestStraightFlush.get(0).getRank() == Rank.ACE ? HandRank.ROYAL_FLUSH
                                                                            : HandRank.STRAIGHT_FLUSH;
 
-        return buildHand(handRank, null, bestStraightFlush);
+        return buildHand(handRank, bestStraightFlush);
     }
 
     private static EvaluatedHand generateBestFourOfAKindHand(List<Card> allCards,
@@ -108,7 +112,7 @@ public class HandEvaluator
             fullHouse.addAll(pairs.get(0));
         }
 
-        return buildHand(HandRank.FULL_HOUSE, null, fullHouse);
+        return buildHand(HandRank.FULL_HOUSE, fullHouse);
     }
 
     private static EvaluatedHand generateBestFlushHand(List<Card> flushes)
@@ -118,7 +122,7 @@ public class HandEvaluator
             return null;
         }
 
-        return buildHand(HandRank.FLUSH, null, flushes.subList(0, 5));
+        return buildHand(HandRank.FLUSH, flushes.subList(0, 5));
     }
 
     private static EvaluatedHand generateBestStraightHand(List<Card> straight)
@@ -128,7 +132,7 @@ public class HandEvaluator
             return null;
         }
 
-        return buildHand(HandRank.STRAIGHT, null, straight);
+        return buildHand(HandRank.STRAIGHT, straight);
     }
 
     private static EvaluatedHand generateBestThreeOfAKindHand(List<Card> allCards,
