@@ -89,4 +89,32 @@ public class PlayerTest extends AbstractParticipantTest
         assertThrows(IllegalArgumentException.class, () -> player.placeAnteAndBlind(0));
         assertThrows(IllegalArgumentException.class, () -> player.placeAnteAndBlind(-10));
     }
+
+    @Test
+    void placeTrips_shouldDeductChipsAndStoreTripsCorrectly()
+    {
+        Player player = (Player) participant;
+
+        player.placeTripsBet(20);
+
+        assertEquals(1000 - 20, player.getChips());
+        assertEquals(20, player.getTrips());
+    }
+
+    @Test
+    void placeTrips_shouldThrowExceptionIfNotEnoughChips()
+    {
+        Player player = (Player) participant;
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeTripsBet(1050));
+    }
+
+    @Test
+    void placeTrips_shouldThrowExceptionIfAmountIsNotAPositiveNumber()
+    {
+        Player player = (Player) participant;
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeTripsBet(0));
+        assertThrows(IllegalArgumentException.class, () -> player.placeTripsBet(-10));
+    }
 }

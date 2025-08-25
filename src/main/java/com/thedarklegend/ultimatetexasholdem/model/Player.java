@@ -98,6 +98,11 @@ public class Player implements Participant
         return bets.getOrDefault(BetType.BLIND, 0);
     }
 
+    public int getTrips()
+    {
+        return bets.getOrDefault(BetType.TRIPS, 0);
+    }
+
     private void placeBet(BetType betType, int amount)
     {
         if (amount <= 0)
@@ -105,7 +110,7 @@ public class Player implements Participant
             throw new IllegalArgumentException(StringUtils.capitalise(betType.name()) + " must be positive");
         }
 
-        if (amount * 2 > chips)
+        if (amount > chips)
         {
             throw new IllegalArgumentException("Not enough chips to play!");
         }
@@ -120,9 +125,15 @@ public class Player implements Participant
         placeBet(BetType.BLIND, amount);
     }
 
+    public void placeTripsBet(int amount)
+    {
+        placeBet(BetType.TRIPS, amount);
+    }
+
     private enum BetType
     {
         ANTE,
-        BLIND
+        BLIND,
+        TRIPS
     }
 }
