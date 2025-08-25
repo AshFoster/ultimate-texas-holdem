@@ -10,6 +10,7 @@ public class PlayerTest extends AbstractParticipantTest
     @Override
     protected Participant createParticipant()
     {
+        Player.resetPlayerCounter();
         return new Player();
     }
 
@@ -58,5 +59,34 @@ public class PlayerTest extends AbstractParticipantTest
         assertEquals(1000, player2.getChips());
         assertEquals("Player3", player3.getName());
         assertEquals(1000, player3.getChips());
+    }
+
+    @Test
+    void placeAnteAndBlind_shouldDeductChipsAndStoreAnteAndBlindCorrectly()
+    {
+        Player player = (Player) participant;
+
+        player.placeAnteAndBlind(20);
+
+        assertEquals(1000 - 40, player.getChips());
+        assertEquals(20, player.getAnte());
+        assertEquals(20, player.getBlind());
+    }
+
+    @Test
+    void placeAnteAndBlind_shouldThrowExceptionIfNotEnoughChips()
+    {
+        Player player = (Player) participant;
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeAnteAndBlind(550));
+    }
+
+    @Test
+    void placeAnteAndBlind_shouldThrowExceptionIfAmountIsNotAPositiveNumber()
+    {
+        Player player = (Player) participant;
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeAnteAndBlind(0));
+        assertThrows(IllegalArgumentException.class, () -> player.placeAnteAndBlind(-10));
     }
 }
