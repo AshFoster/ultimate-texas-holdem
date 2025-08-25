@@ -3,20 +3,30 @@ package com.thedarklegend.ultimatetexasholdem.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Player
+public class Player implements Participant
 {
-    private List<Card> hand;
+    private final List<Card> hand = new ArrayList<>();
+    private EvaluatedHand evaluatedHand;
 
-    public Player()
-    {
-        this.hand = new ArrayList<>();
-    }
-
+    @Override
     public List<Card> getHand()
     {
         return new ArrayList<>(hand);
     }
 
+    @Override
+    public EvaluatedHand getEvaluatedHand()
+    {
+        return evaluatedHand;
+    }
+
+    @Override
+    public void setEvaluatedHand(EvaluatedHand evaluatedHand)
+    {
+        this.evaluatedHand = evaluatedHand;
+    }
+
+    @Override
     public void receiveCard(Card card)
     {
         if (hand.size() >= 2)
@@ -26,6 +36,7 @@ public class Player
         hand.add(card);
     }
 
+    @Override
     public void resetHand()
     {
         hand.clear();
