@@ -117,4 +117,85 @@ public class PlayerTest extends AbstractParticipantTest
         assertThrows(IllegalArgumentException.class, () -> player.placeTripsBet(0));
         assertThrows(IllegalArgumentException.class, () -> player.placeTripsBet(-10));
     }
+
+    @Test
+    void placeBet_shouldDeductChipsAndStoreBetCorrectly_whenMultiplierOfThreeIsUsedPreFlop()
+    {
+        Player player = (Player) participant;
+
+        player.placeAnteAndBlind(20);
+        player.placeBet(Player.BettingRound.PRE_FLOP, 3 );
+
+        assertEquals(1000 - 20 - 20 - 60, player.getChips());
+        assertEquals(60, player.getBets());
+    }
+
+    @Test
+    void placeBet_shouldDeductChipsAndStoreBetCorrectly_whenMultiplierOfFourIsUsedPreFlopBet()
+    {
+        Player player = (Player) participant;
+
+        player.placeAnteAndBlind(20);
+        player.placeBet(Player.BettingRound.PRE_FLOP, 4 );
+
+        assertEquals(1000 - 20 - 20 - 80, player.getChips());
+        assertEquals(80, player.getBets());
+    }
+
+    @Test
+    void placeBet_shouldDeductChipsAndStoreBetCorrectly_whenMultiplierOfTwoIsUsedOnFlopBet()
+    {
+        Player player = (Player) participant;
+
+        player.placeAnteAndBlind(20);
+        player.placeBet(Player.BettingRound.FLOP, 2 );
+
+        assertEquals(1000 - 20 - 20 - 40, player.getChips());
+        assertEquals(40, player.getBets());
+    }
+
+    @Test
+    void placeBet_shouldDeductChipsAndStoreBetCorrectly_whenMultiplierOfOneIsUsedOnTurnAndRiverBet()
+    {
+        Player player = (Player) participant;
+
+        player.placeAnteAndBlind(20);
+        player.placeBet(Player.BettingRound.TURN_AND_RIVER, 1 );
+
+        assertEquals(1000 - 20 - 20 - 20, player.getChips());
+        assertEquals(20, player.getBets());
+    }
+
+    @Test
+    void placeBet_shouldThrowException_whenMultiplierIsNotThreeOrFourOnPreFlopBet()
+    {
+        Player player = (Player) participant;
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.PRE_FLOP, 2));
+    }
+
+    @Test
+    void placeBet_shouldThrowException_whenMultiplierIsNotTwoOnFlopBet()
+    {
+        Player player = (Player) participant;
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.FLOP, 1));
+    }
+
+    @Test
+    void placeBet_shouldThrowException_whenMultiplierIsNotOneOnTurnAndRiverBet()
+    {
+        Player player = (Player) participant;
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.TURN_AND_RIVER, 2));
+    }
+
+    @Test
+    void placeBet_shouldThrowExceptionIfNotEnoughChips()
+    {
+        Player player = new Player("Ash", 50);
+        player.placeAnteAndBlind(20);
+
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.FLOP, 2));
+    }
 }

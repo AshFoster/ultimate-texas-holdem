@@ -103,7 +103,12 @@ public class Player implements Participant
         return bets.getOrDefault(BetType.TRIPS, 0);
     }
 
-    private void placeBet(BetType betType, int amount)
+    public int getBets()
+    {
+        return bets.getOrDefault(BetType.BET, 0);
+    }
+
+    private void placeBetByType(BetType betType, int amount)
     {
         if (amount <= 0)
         {
@@ -121,19 +126,61 @@ public class Player implements Participant
 
     public void placeAnteAndBlind(int amount)
     {
-        placeBet(BetType.ANTE, amount);
-        placeBet(BetType.BLIND, amount);
+        placeBetByType(BetType.ANTE, amount);
+        placeBetByType(BetType.BLIND, amount);
     }
 
     public void placeTripsBet(int amount)
     {
-        placeBet(BetType.TRIPS, amount);
+        placeBetByType(BetType.TRIPS, amount);
+    }
+
+    public void placeBet(BettingRound round, int multiplier)
+    {
+        validateBet(round, multiplier);
+        placeBetByType(BetType.BET, getAnte() * multiplier);
+    }
+
+    private void validateBet(BettingRound round, int multiplier)
+    {
+        switch (round)
+        {
+            case PRE_FLOP ->
+            {
+                if (multiplier != 3 && multiplier != 4)
+                {
+                    throw new IllegalArgumentException("Pre-Flop bet must be 3x or 4x the ante!");
+                }
+            }
+            case FLOP ->
+            {
+                if (multiplier != 2)
+                {
+                    throw new IllegalArgumentException("Flop bet must be 2x the ante!");
+                }
+            }
+            case TURN_AND_RIVER ->
+            {
+                if (multiplier != 1)
+                {
+                    throw new IllegalArgumentException("Turn-and-River bet must be 1x the ante!");
+                }
+            }
+        }
     }
 
     private enum BetType
     {
         ANTE,
         BLIND,
-        TRIPS
+        TRIPS,
+        BET
+    }
+
+    enum BettingRound
+    {
+        PRE_FLOP,
+        FLOP,
+        TURN_AND_RIVER
     }
 }
