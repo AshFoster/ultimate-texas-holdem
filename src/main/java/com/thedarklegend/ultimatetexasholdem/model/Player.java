@@ -2,20 +2,16 @@ package com.thedarklegend.ultimatetexasholdem.model;
 
 import com.thedarklegend.ultimatetexasholdem.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 
-public class Player implements Participant
+public class Player extends AbstractParticipant implements Participant
 {
     private static int playerCounter = 0;
     private static final int DEFAULT_CHIPS = 1000;
     private final String name;
     private int chips;
     private final Map<BetType, Integer> bets = new EnumMap<>(BetType.class);
-    private final List<Card> hand = new ArrayList<>();
-    private EvaluatedHand evaluatedHand;
 
     public Player()
     {
@@ -47,40 +43,6 @@ public class Player implements Participant
     public int getChips()
     {
         return chips;
-    }
-
-    @Override
-    public List<Card> getHand()
-    {
-        return new ArrayList<>(hand);
-    }
-
-    @Override
-    public EvaluatedHand getEvaluatedHand()
-    {
-        return evaluatedHand;
-    }
-
-    @Override
-    public void setEvaluatedHand(EvaluatedHand evaluatedHand)
-    {
-        this.evaluatedHand = evaluatedHand;
-    }
-
-    @Override
-    public void receiveCard(Card card)
-    {
-        if (hand.size() >= 2)
-        {
-            throw new IllegalStateException("Player already has 2 cards!");
-        }
-        hand.add(card);
-    }
-
-    @Override
-    public void resetHand()
-    {
-        hand.clear();
     }
 
     public static void resetPlayerCounter()
