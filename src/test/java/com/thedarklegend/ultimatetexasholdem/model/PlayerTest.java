@@ -124,7 +124,7 @@ public class PlayerTest extends AbstractParticipantTest
         Player player = (Player) participant;
 
         player.placeAnteAndBlind(20);
-        player.placeBet(Player.BettingRound.PRE_FLOP, 3 );
+        player.placeBet(BettingRound.PRE_FLOP, 3 );
 
         assertEquals(1000 - 20 - 20 - 60, player.getChips());
         assertEquals(60, player.getBets());
@@ -136,7 +136,7 @@ public class PlayerTest extends AbstractParticipantTest
         Player player = (Player) participant;
 
         player.placeAnteAndBlind(20);
-        player.placeBet(Player.BettingRound.PRE_FLOP, 4 );
+        player.placeBet(BettingRound.PRE_FLOP, 4 );
 
         assertEquals(1000 - 20 - 20 - 80, player.getChips());
         assertEquals(80, player.getBets());
@@ -148,7 +148,7 @@ public class PlayerTest extends AbstractParticipantTest
         Player player = (Player) participant;
 
         player.placeAnteAndBlind(20);
-        player.placeBet(Player.BettingRound.FLOP, 2 );
+        player.placeBet(BettingRound.FLOP, 2 );
 
         assertEquals(1000 - 20 - 20 - 40, player.getChips());
         assertEquals(40, player.getBets());
@@ -160,7 +160,7 @@ public class PlayerTest extends AbstractParticipantTest
         Player player = (Player) participant;
 
         player.placeAnteAndBlind(20);
-        player.placeBet(Player.BettingRound.TURN_AND_RIVER, 1 );
+        player.placeBet(BettingRound.TURN_AND_RIVER, 1 );
 
         assertEquals(1000 - 20 - 20 - 20, player.getChips());
         assertEquals(20, player.getBets());
@@ -171,7 +171,7 @@ public class PlayerTest extends AbstractParticipantTest
     {
         Player player = (Player) participant;
 
-        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.PRE_FLOP, 2));
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(BettingRound.PRE_FLOP, 2));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class PlayerTest extends AbstractParticipantTest
     {
         Player player = (Player) participant;
 
-        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.FLOP, 1));
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(BettingRound.FLOP, 1));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class PlayerTest extends AbstractParticipantTest
     {
         Player player = (Player) participant;
 
-        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.TURN_AND_RIVER, 2));
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(BettingRound.TURN_AND_RIVER, 2));
     }
 
     @Test
@@ -196,6 +196,6 @@ public class PlayerTest extends AbstractParticipantTest
         Player player = new Player("Ash", 50);
         player.placeAnteAndBlind(20);
 
-        assertThrows(IllegalArgumentException.class, () -> player.placeBet(Player.BettingRound.FLOP, 2));
+        assertThrows(IllegalArgumentException.class, () -> player.placeBet(BettingRound.FLOP, 2));
     }
 }

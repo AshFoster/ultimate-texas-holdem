@@ -138,11 +138,4 @@ public class Player extends AbstractParticipant implements Participant
         TRIPS,
         BET
     }
-
-    enum BettingRound
-    {
-        PRE_FLOP,
-        FLOP,
-        TURN_AND_RIVER
-    }
 }
