@@ -1,5 +1,6 @@
 package com.thedarklegend.ultimatetexasholdem.model;
 
+import com.thedarklegend.ultimatetexasholdem.game.GamePhase;
 import com.thedarklegend.ultimatetexasholdem.util.StringUtils;
 
 import java.util.EnumMap;
@@ -97,15 +98,20 @@ public class Player extends AbstractParticipant implements Participant
         placeBetByType(BetType.TRIPS, amount);
     }
 
-    public void placeBet(BettingRound round, int multiplier)
+    public void placeBet(GamePhase gamePhase, int multiplier)
     {
-        validateBet(round, multiplier);
+        validateBet(gamePhase, multiplier);
         placeBetByType(BetType.BET, getAnte() * multiplier);
     }
 
-    private void validateBet(BettingRound round, int multiplier)
+    private void validateBet(GamePhase gamePhase, int multiplier)
     {
-        switch (round)
+        if (!gamePhase.isBettingPhase())
+        {
+            throw new IllegalArgumentException("Bets are not allowed during game phase: " + gamePhase);
+        }
+
+        switch (gamePhase)
         {
             case PRE_FLOP ->
             {
@@ -128,6 +134,7 @@ public class Player extends AbstractParticipant implements Participant
                     throw new IllegalArgumentException("Turn-and-River bet must be 1x the ante!");
                 }
             }
+            default -> throw new IllegalArgumentException("Unexpected game phase: " + gamePhase);
         }
     }
 

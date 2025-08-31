@@ -36,12 +36,12 @@ public class Game
         dealer.receiveCard(deck.draw());
         player.receiveCard(deck.draw());
         dealer.receiveCard(deck.draw());
-        gamePhase = GamePhase.HOLE_CARDS;
+        gamePhase = GamePhase.PRE_FLOP;
     }
 
     public void dealFlop()
     {
-        if (gamePhase != GamePhase.HOLE_CARDS)
+        if (gamePhase != GamePhase.PRE_FLOP)
         {
             throw new IllegalStateException("Must deal hole cards first!");
         }

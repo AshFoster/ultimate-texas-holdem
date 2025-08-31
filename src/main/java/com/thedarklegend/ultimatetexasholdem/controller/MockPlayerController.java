@@ -1,6 +1,6 @@
 package com.thedarklegend.ultimatetexasholdem.controller;
 
-import com.thedarklegend.ultimatetexasholdem.model.BettingRound;
+import com.thedarklegend.ultimatetexasholdem.game.GamePhase;
 import com.thedarklegend.ultimatetexasholdem.model.Player;
 import com.thedarklegend.ultimatetexasholdem.model.PlayerAction;
 
@@ -24,7 +24,7 @@ public class MockPlayerController implements PlayerController
     }
 
     @Override
-    public PlayerAction getPlayerAction(BettingRound round)
+    public PlayerAction getPlayerAction(GamePhase gamePhase)
     {
         if (actions.isEmpty())
         {

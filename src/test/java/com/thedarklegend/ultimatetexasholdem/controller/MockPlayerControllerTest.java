@@ -1,6 +1,6 @@
 package com.thedarklegend.ultimatetexasholdem.controller;
 
-import com.thedarklegend.ultimatetexasholdem.model.BettingRound;
+import com.thedarklegend.ultimatetexasholdem.game.GamePhase;
 import com.thedarklegend.ultimatetexasholdem.model.Player;
 import com.thedarklegend.ultimatetexasholdem.model.PlayerAction;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,14 +33,14 @@ public class MockPlayerControllerTest
     {
         controller.addAction(PlayerAction.CHECK);
         controller.addAction(PlayerAction.BET);
-        assertEquals(PlayerAction.CHECK, controller.getPlayerAction(BettingRound.PRE_FLOP));
-        assertEquals(PlayerAction.BET, controller.getPlayerAction(BettingRound.FLOP));
+        assertEquals(PlayerAction.CHECK, controller.getPlayerAction(GamePhase.PRE_FLOP));
+        assertEquals(PlayerAction.BET, controller.getPlayerAction(GamePhase.FLOP));
     }
 
     @Test
     void getPlayerAction_shouldThrowException_whenNoMoreActions()
     {
         assertThrows(IllegalStateException.class,
-                     () -> controller.getPlayerAction(BettingRound.TURN_AND_RIVER));
+                     () -> controller.getPlayerAction(GamePhase.TURN_AND_RIVER));
     }
 }
