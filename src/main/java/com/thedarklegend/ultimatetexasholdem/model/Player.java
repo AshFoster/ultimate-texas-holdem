@@ -10,35 +10,25 @@ public class Player extends AbstractParticipant implements Participant
 {
     private static int playerCounter = 0;
     private static final int DEFAULT_CHIPS = 1000;
-    private final String name;
     private int chips;
     private final Map<BetType, Integer> bets = new EnumMap<>(BetType.class);
 
     public Player()
     {
-        this.name = "Player" + (++playerCounter);
+        super("Player" + (++playerCounter));
         this.chips = DEFAULT_CHIPS;
     }
 
     public Player(String name, int startingChips)
     {
-        if (name == null || name.trim().isEmpty())
-        {
-            throw new IllegalArgumentException("Name cannot be null or empty!");
-        }
+        super(name);
 
         if (startingChips < 0)
         {
             throw new IllegalArgumentException("Starting chips cannot be negative!");
         }
 
-        this.name = name;
         this.chips = startingChips;
-    }
-
-    public String getName()
-    {
-        return name;
     }
 
     public int getChips()

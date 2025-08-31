@@ -4,6 +4,7 @@ import java.util.List;
 
 public interface Participant
 {
+    String getName();
     List<Card> getHand();
     EvaluatedHand getEvaluatedHand();
     void setEvaluatedHand(EvaluatedHand evaluatedHand);

@@ -5,8 +5,26 @@ import java.util.List;
 
 public class AbstractParticipant implements Participant
 {
+    private final String name;
     private final List<Card> hand = new ArrayList<>();
     private EvaluatedHand evaluatedHand;
+
+    public AbstractParticipant(String name)
+    {
+        if (name == null || name.trim().isEmpty())
+        {
+            throw new IllegalArgumentException("Name cannot be null or empty!");
+        }
+
+        this.name = name;
+    }
+
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
     @Override
     public List<Card> getHand()
     {
