@@ -11,7 +11,8 @@ public class GameTest
     void startShouldDealTwoCardsToPlayerAndDealer()
    {
        Game game = new Game();
-       game.start();
+       game.reset();
+       game.dealHoleCards();
 
        assertEquals(2, game.getPlayer().getHand().size());
        assertEquals(2, game.getDealer().getHand().size());
@@ -21,7 +22,8 @@ public class GameTest
     void dealFlopShouldBurnOneCardAndDealThreeCommunityCards()
     {
         Game game = new Game();
-        game.start();
+        game.reset();
+        game.dealHoleCards();
         game.dealFlop();
 
         assertEquals(52 - 8, game.getDeck().size());
@@ -32,7 +34,8 @@ public class GameTest
     void dealTurnAndRiverShouldBurnTwoCardsAndDealTwoCommunityCards()
     {
         Game game = new Game();
-        game.start();
+        game.reset();
+        game.dealHoleCards();
         game.dealFlop();
         game.dealTurnAndRiver();
 
@@ -44,7 +47,8 @@ public class GameTest
     void resetShouldClearHandsAndCommunityCards()
     {
         Game game = new Game();
-        game.start();
+        game.reset();
+        game.dealHoleCards();
         game.dealFlop();
         game.dealTurnAndRiver();
         game.reset();

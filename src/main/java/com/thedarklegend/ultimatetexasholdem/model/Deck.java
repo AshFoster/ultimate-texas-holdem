@@ -4,18 +4,11 @@ import java.util.*;
 
 public class Deck
 {
-    private final List<Card> cards;
+    private final List<Card> cards = new ArrayList<>();
 
     public Deck()
     {
-        cards = new ArrayList<>();
-        for(Rank rank : Rank.values())
-        {
-            for(Suit suit : Suit.values())
-            {
-                cards.add(new Card(rank, suit));
-            }
-        }
+        fillDeck();
     }
 
     public List<Card> getCards()
@@ -46,5 +39,22 @@ public class Deck
     public void shuffle(Random random)
     {
         Collections.shuffle(cards, random);
+    }
+
+    public void reset()
+    {
+        cards.clear();
+        fillDeck();
+    }
+
+    private void fillDeck()
+    {
+        for(Rank rank : Rank.values())
+        {
+            for(Suit suit : Suit.values())
+            {
+                cards.add(new Card(rank, suit));
+            }
+        }
     }
 }

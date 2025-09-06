@@ -1,36 +1,28 @@
 package com.thedarklegend.ultimatetexasholdem.game;
 
-import com.thedarklegend.ultimatetexasholdem.model.Card;
-import com.thedarklegend.ultimatetexasholdem.model.Dealer;
-import com.thedarklegend.ultimatetexasholdem.model.Deck;
-import com.thedarklegend.ultimatetexasholdem.model.Player;
+import com.thedarklegend.ultimatetexasholdem.model.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Game
 {
-    private final Deck deck;
+    private final Deck deck = new Deck();
+    private final Dealer dealer = new Dealer();
     private final Player player;
-    private final Dealer dealer;
-    private final List<Card> communityCards;
+    private final List<Card> communityCards = new ArrayList<>();
     private GamePhase gamePhase = GamePhase.NOT_STARTED;
 
     public Game()
     {
-        this.deck = new Deck();
         this.player = new Player();
-        this.dealer = new Dealer();
-        this.communityCards = new ArrayList<>();
     }
 
-    public void start()
+    public Game(Player player)
     {
-        deck.shuffle();
-        dealHoleCards();
+        this.player = player;
     }
 
-    private void dealHoleCards()
+    public void dealHoleCards()
     {
         player.receiveCard(deck.draw());
         dealer.receiveCard(deck.draw());
@@ -75,6 +67,8 @@ public class Game
 
     public void reset()
     {
+        deck.reset();
+        deck.shuffle();
         player.resetHand();
         dealer.resetHand();
         communityCards.clear();
@@ -99,5 +93,10 @@ public class Game
     public List<Card> getCommunityCards()
     {
         return new ArrayList<>(communityCards);
+    }
+
+    public GamePhase getGamePhase()
+    {
+        return gamePhase;
     }
 }
